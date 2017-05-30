@@ -1,11 +1,18 @@
+export const SET_USER = "SET_USER";
+export const SET_PAGE = "SET_PAGE";
+
+
 const initialState = {
-	test: 0,
+	user: undefined,
+	page: undefined,
 }
 
 export const app = (state = initialState, action) => {
 	switch(action.type){
-		case "TEST":
-			return Object.assign({}, state, {test: action.index});
+		case SET_USER:
+			return Object.assign({}, state, {user: action.user});
+		case SET_PAGE:
+			return Object.assign({}, state, {page: action.page_component})
 		default:
 			return state;
 	}
