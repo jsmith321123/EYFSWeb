@@ -10,7 +10,7 @@ export class LoginComponent extends React.Component {
 		//open socket to communicate with server
 		var io = require("../../node_modules/socket.io-client/dist/socket.io.js");
 		
-		var socket = io.connect("http://localhost:3000");
+		var socket = io.connect("http://192.168.1.181:3000");
 
 		//get inputted username
 		var user = document.getElementById("username").value;
