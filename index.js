@@ -1,10 +1,12 @@
+/*
+	Start web server.
+*/
+
 const express = require("express");
 const app = express();
 
 const path = require("path");
 
-var server = require("http").createServer(app);
-var io = require("socket.io").listen(server);
 
 app.use(express.static(__dirname));
 
@@ -16,6 +18,10 @@ app.get('/', function (req, res) {
 server.listen(3000, function () {
 	console.log("Example app listing on port 3000!");
 })
+
+/*
+	Connect to db!
+*/
 
 var mysql = require("mysql");
 
@@ -32,7 +38,14 @@ connection.connect((err) => {
 })
 
 
-//wait for connections from client
+/*
+	Wait for connections from client!
+*/
+
+var server = require("http").createServer(app);
+var io = require("socket.io").listen(server);
+
+var hash = require("./js/hash.js").hash;
 
 io.on("connect", function(client) {
 	var rws = "NULL";
@@ -40,32 +53,28 @@ io.on("connect", function(client) {
 	client.on("get_pw", function (user) {
 		console.log(user);
 
+		//get data from db
 		var query = connection.query("SELECT hashed_password FROM users WHERE user_name=\'" + user + "\';", function(err, rows) {
 			if (!err) {
-				console.log(rows);
-
 				row = rows[0];
 			}
 
 			if (row == undefined) {
-				io.emit("get_pw", undefined);
+				client.emit("get_pw", undefined);
 			} else {
 				console.log(row.hashed_password);
 
-				io.emit("get_pw", row.hashed_password);
+				client.emit("get_pw", row.hashed_password);
 			}
 		});
+	});
+
+	//hash password
+	client.on("hash", function (pass) {
+		client.emit("hash", hash(pass));
 	});
 
 	client.on('disconnect', function() {
         console.log('Client disconnected.');
     });
 });
-
-
-
-
-
-
-
-

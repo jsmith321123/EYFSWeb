@@ -4,22 +4,34 @@ import {PlaceholderComponent} from './PlaceholderComponent.jsx';
 
 export class LoginComponent extends React.Component {
 	submit_pw (props) {
-		var pw = document.getElementById("password").value;
-		pw = "0";
-
 		//open socket to communicate with server
 		var io = require("../../node_modules/socket.io-client/dist/socket.io.js");
 		
-		var socket = io.connect("http://192.168.1.181:3000");
+		var socket = io.connect("http://192.168.1.141:3000");
 
+
+		this.hash_password(props, socket);
+	}
+
+	hash_password(props, socket) {
+		let pw = document.getElementById("password").value;
+
+		socket.emit("hash", pw);
+
+		socket.on("hash", (hashed) => {
+			this.login(props, socket, hashed);			
+		});
+	}
+
+	login(props, socket, hashed) {
 		//get inputted username
-		var user = document.getElementById("username").value;
+		let user = document.getElementById("username").value;
 
 		//submit username to server and handle data received
 		socket.emit("get_pw", user);
 
 		socket.on("get_pw", (data) => {
-			if (data != undefined && data == pw) {
+			if (data != undefined && parseInt(data) == hashed) {
 				props.store.dispatch({type: "SET_USER", user: user});
 				props.store.dispatch({type: "SET_PAGE", page_component: PlaceholderComponent});
 			} else {
@@ -28,7 +40,6 @@ export class LoginComponent extends React.Component {
 
 			socket.disconnect();
 		});
-
 	}
 
 	render() {
