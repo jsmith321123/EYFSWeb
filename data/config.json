@@ -1,0 +1,9 @@
+{
+	"path": "/mnt/e/gits/EYFSTool",
+	"database_connection": {
+		"host": "localhost",
+		"user": "root",
+		"password": "1011josh",
+		"database": "EYFSWeb"
+	}
+}

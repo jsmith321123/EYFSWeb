@@ -15,19 +15,19 @@ var renderApp = (str) => {
 	)
 }
 
-var store = createStore(app);
-
-console.log(store.getState());
-
-store.subscribe(() => {
-	console.log("");
-	console.log("CHANGE!");
-	console.log(store.getState());
-	console.log("");
-});
+var store = createStore(
+	app, 
+	//allow redux devtools
+	window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
 
 store.subscribe(() => {
 	renderApp(store);
 })
 
 store.dispatch({type: SET_PAGE, page_component: LoginComponent});
+
+//handle cookies
+import {handleCookies} from './HandleCookies.jsx';
+
+handleCookies(store);

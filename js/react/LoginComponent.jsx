@@ -1,14 +1,13 @@
 import React from 'react';
 
-import {PlaceholderComponent} from './PlaceholderComponent.jsx';
+import {login} from './../Login.jsx';
 
 export class LoginComponent extends React.Component {
 	submit_pw (props) {
 		//open socket to communicate with server
 		var io = require("../../node_modules/socket.io-client/dist/socket.io.js");
 		
-		var socket = io.connect("http://192.168.1.141:3000");
-
+		var socket = io.connect(location.host);
 
 		this.hash_password(props, socket);
 	}
@@ -27,19 +26,36 @@ export class LoginComponent extends React.Component {
 		//get inputted username
 		let user = document.getElementById("username").value;
 
-		//submit username to server and handle data received
-		socket.emit("get_pw", user);
+		socket.emit("get_id", user)
 
-		socket.on("get_pw", (data) => {
-			if (data != undefined && parseInt(data) == hashed) {
-				props.store.dispatch({type: "SET_USER", user: user});
-				props.store.dispatch({type: "SET_PAGE", page_component: PlaceholderComponent});
-			} else {
-				document.getElementById("pw_error").innerHTML = "Wrong username or password.";
-			}
+		//get id corresponding to the user
+		socket.on("get_id", (id) => {
+			//submit username to server and handle data received
+			socket.emit("get_pw", id);
+	
+			socket.on("get_pw", (data) => {
+				if (data != undefined && parseInt(data) == hashed) {
+					console.log(document);
+					console.log(document.getElementById("remember"));
+	
+					if (document.getElementById("remember").checked) {
+						document.cookie = "user=" + id;
+					} else {
+						//wipe cookie for user
+						document.cookie = "user=";
+					}
+	
+					login(props.store, id);
 
-			socket.disconnect();
+					socket.disconnect();
+				} else {
+					//tell the user that the login attempt failed
+					document.getElementById("pw_error").innerHTML = "Wrong username or password.";
+				}
+			});
 		});
+
+		
 	}
 
 	render() {
@@ -48,6 +64,7 @@ export class LoginComponent extends React.Component {
 			<div>
 				<p><input id="username" placeholder="username"></input></p>
 				<p><input id="password" type="password" placeholder="password"></input></p>
+				<p><input id="remember" type="checkbox"></input>Remember me.</p>
 				<p><button id="submit_pw" onClick={() => this.submit_pw(this.props)}>Submit</button></p>
 				<p id="pw_error"></p>
 			</div>
